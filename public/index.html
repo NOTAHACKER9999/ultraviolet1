@@ -1,1 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultraviolet Proxy</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        input {
+            width: 260px;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #1e90ff;
+            color: white;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
 
+<h2>Ultraviolet</h2>
+
+<input id="site" placeholder="example.com or https://..." autocomplete="off">
+<button onclick="go()">Go</button>
+
+<script src="/src/uv.bundle.js"></script>
+<script src="/src/uv.config.js"></script>
+<script src="/baremux/bare.cjs"></script>
+<script src="/epoxy/epoxy.client.js"></script>
+
+<script>
+    // Register the UV service worker
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js", {
+            scope: "/"
+        }).catch(err => console.error("SW reg failed:", err));
+    }
+
+    function go() {
+        let input = document.getElementById("site").value.trim();
+
+        if (!input.startsWith("http://") && !input.startsWith("https://")) {
+            input = "https://" + input;
+        }
+
+        // Encode with UV
+        const encoded = __uv$config.encodeUrl(input);
+
+        // Open the proxied page
+        window.location.href = encoded;
+    }
+</script>
+
+</body>
+  </html>
