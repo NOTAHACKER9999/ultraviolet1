@@ -1,74 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultraviolet Proxy</title>
-    <style>
-        body {
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-        }
-        input {
-            width: 260px;
-            padding: 10px;
-            border-radius: 6px;
-            border: none;
-            outline: none;
-            margin-bottom: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: #1e90ff;
-            color: white;
-            font-size: 15px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultraviolet Proxy</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      flex-direction: column;
+    }
+    input {
+      width: 300px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+    button {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      background: #1e90ff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Ultraviolet</h2>
+<h2>Ultraviolet Proxy</h2>
 
 <input id="site" placeholder="example.com or https://..." autocomplete="off">
 <button onclick="go()">Go</button>
 
-<script src="/src/uv.bundle.js"></script>
-<script src="/src/uv.config.js"></script>
-<script src="/baremux/bare.cjs"></script>
-<script src="/epoxy/epoxy.client.js"></script>
+<!-- Load the main UV client bundle -->
+<script src="./src/uv.bundle.js"></script>
+<script src="./src/uv.config.js"></script>
 
 <script>
-    // Register the UV service worker
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/sw.js", {
-            scope: "/"
-        }).catch(err => console.error("SW reg failed:", err));
+  // Register the service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./src/sw.js', { scope: '/' })
+      .catch(err => console.error('SW registration failed:', err));
+  }
+
+  function go() {
+    let url = document.getElementById('site').value.trim();
+
+    // Add https:// if missing
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
     }
 
-    function go() {
-        let input = document.getElementById("site").value.trim();
+    // Encode URL using the UV client
+    const proxied = __uv$config.encodeUrl(url);
 
-        if (!input.startsWith("http://") && !input.startsWith("https://")) {
-            input = "https://" + input;
-        }
-
-        // Encode with UV
-        const encoded = __uv$config.encodeUrl(input);
-
-        // Open the proxied page
-        window.location.href = encoded;
-    }
+    // Redirect to proxied URL
+    window.location.href = proxied;
+  }
 </script>
 
 </body>
-  </html>
+</html>
